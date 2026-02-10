@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: problem-submission-form
+    name: min-heart
     env: python
     region: oregon
     plan: free
@@ -18,3 +18,5 @@ services:
         generateValue: true
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: PORT
+        value: 10000
