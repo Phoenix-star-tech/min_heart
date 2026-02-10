@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confession Sent! - Anonymous Confessions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #60a5fa;
+            --primary-lighter: #93c5fd;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --text-dark: #0f172a;
+            --text-medium: #64748b;
+            --text-light: #94a3b8;
+            --bg-page: #f0f5ff;
+            --bg-white: #ffffff;
+            --border: #dbeafe;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-page);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.04) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            background: var(--bg-white);
+            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(37, 99, 235, 0.06);
+            max-width: 580px;
+            width: 100%;
+            padding: 52px 44px;
+            text-align: center;
+            animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(219, 234, 254, 0.6);
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 24px;
+            right: 24px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 50%, var(--primary-lighter) 100%);
+            border-radius: 0 0 4px 4px;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Success Illustration */
+        .success-illustration {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 28px;
+            position: relative;
+            animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+        }
+
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-illustration svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Checkmark animation inside the illustration */
+        .check-path {
+            stroke-dasharray: 60;
+            stroke-dashoffset: 60;
+            animation: drawCheck 0.5s ease-out 0.6s forwards;
+        }
+
+        @keyframes drawCheck {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .circle-path {
+            stroke-dasharray: 200;
+            stroke-dashoffset: 200;
+            animation: drawCircle 0.6s ease-out 0.3s forwards;
+        }
+
+        @keyframes drawCircle {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .envelope-fly {
+            animation: envelopeFly 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes envelopeFly {
+            0% {
+                transform: translateY(20px) scale(0.9);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Small sparkles around illustration */
+        .sparkle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            animation: sparkle 1.5s ease-out both;
+        }
+
+        .sparkle:nth-child(1) {
+            top: 10%;
+            left: 5%;
+            animation-delay: 0.7s;
+        }
+
+        .sparkle:nth-child(2) {
+            top: 5%;
+            right: 10%;
+            animation-delay: 0.9s;
+            width: 6px;
+            height: 6px;
+        }
+
+        .sparkle:nth-child(3) {
+            bottom: 20%;
+            left: 0%;
+            animation-delay: 1.1s;
+            width: 5px;
+            height: 5px;
+            background: var(--primary-lighter);
+        }
+
+        .sparkle:nth-child(4) {
+            bottom: 15%;
+            right: 5%;
+            animation-delay: 0.8s;
+            width: 7px;
+            height: 7px;
+        }
+
+        .sparkle:nth-child(5) {
+            top: 30%;
+            right: 0%;
+            animation-delay: 1.0s;
+            width: 4px;
+            height: 4px;
+            background: #c7d2fe;
+        }
+
+        @keyframes sparkle {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.3);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+        }
+
+        h1 {
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            animation: fadeInUp 0.5s ease-out 0.3s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .main-text {
+            color: var(--text-medium);
+            margin-bottom: 32px;
+            font-size: 15px;
+            line-height: 1.7;
+            max-width: 420px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeInUp 0.5s ease-out 0.4s both;
+        }
+
+        /* Info steps */
+        .steps-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 32px;
+            text-align: left;
+            animation: fadeInUp 0.5s ease-out 0.5s both;
+        }
+
+        .steps-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 18px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .step-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-icon {
+            width: 36px;
+            height: 36px;
+            background: #eff6ff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .step-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--primary);
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-text {
+            font-size: 14px;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .step-subtext {
+            font-size: 12px;
+            color: var(--text-medium);
+            margin-top: 1px;
+        }
+
+        /* Divider between steps */
+        .step-divider {
+            width: 1px;
+            height: 10px;
+            background: #e2e8f0;
+            margin-left: 17px;
+            margin-bottom: 14px;
+        }
+
+        .button-group {
+            animation: fadeInUp 0.5s ease-out 0.6s both;
+        }
+
+        a.btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+            transition: all 0.2s ease;
+            letter-spacing: 0.2px;
+        }
+
+        a.btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+        }
+
+        a.btn-primary:active {
+            transform: translateY(0);
+        }
+
+        a.btn-primary svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .footer-text {
+            margin-top: 28px;
+            font-size: 12px;
+            color: var(--text-light);
+            animation: fadeInUp 0.5s ease-out 0.7s both;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+            animation: confettiFall linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 28px;
+                border-radius: 16px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .main-text {
+                font-size: 14px;
+            }
+
+            .success-illustration {
+                width: 160px;
+                height: 160px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 16px;
+            }
+
+            .container {
+                padding: 32px 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .main-text {
+                font-size: 13px;
+            }
+
+            .success-illustration {
+                width: 140px;
+                height: 140px;
+            }
+
+            a.btn-primary {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Success illustration with envelope & checkmark -->
+        <div class="success-illustration">
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none">
+                <!-- Background circle -->
+                <circle cx="100" cy="100" r="90" fill="#eff6ff" stroke="#dbeafe" stroke-width="1.5" />
+
+                <!-- Envelope body -->
+                <g class="envelope-fly">
+                    <rect x="50" y="70" width="100" height="72" rx="8" fill="white" stroke="#2563eb" stroke-width="2" />
+                    <!-- Envelope flap -->
+                    <path d="M50 78l50 35 50-35" stroke="#2563eb" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" fill="none" />
+                    <!-- Envelope lines (letter content) -->
+                    <line x1="68" y1="110" x2="132" y2="110" stroke="#dbeafe" stroke-width="2" stroke-linecap="round" />
+                    <line x1="68" y1="120" x2="115" y2="120" stroke="#dbeafe" stroke-width="2" stroke-linecap="round" />
+                    <line x1="68" y1="130" x2="100" y2="130" stroke="#dbeafe" stroke-width="2" stroke-linecap="round" />
+                </g>
+
+                <!-- Checkmark circle -->
+                <circle cx="145" cy="55" r="22" fill="#2563eb" stroke="white" stroke-width="3" />
+                <circle class="circle-path" cx="145" cy="55" r="22" fill="none" stroke="#1d4ed8" stroke-width="1"
+                    opacity="0.3" />
+
+                <!-- Checkmark -->
+                <path class="check-path" d="M135 55l6 6 14-14" stroke="white" stroke-width="3" stroke-linecap="round"
+                    stroke-linejoin="round" fill="none" />
+
+                <!-- Small decorative elements -->
+                <circle cx="40" cy="50" r="4" fill="#dbeafe" />
+                <circle cx="165" cy="155" r="3" fill="#93c5fd" />
+                <circle cx="30" cy="130" r="2.5" fill="#bfdbfe" />
+
+                <!-- Paper plane -->
+                <g transform="translate(55, 40) rotate(-15)">
+                    <path d="M0 8L20 0L8 12L6 8Z" fill="#60a5fa" opacity="0.6" />
+                    <path d="M6 8L8 12L20 0" stroke="#3b82f6" stroke-width="0.8" fill="none" opacity="0.6" />
+                </g>
+
+                <!-- Stars -->
+                <path d="M170 130l2 4 4 1-3 3 1 4-4-2-4 2 1-4-3-3 4-1z" fill="#93c5fd" opacity="0.5" />
+                <path d="M35 75l1.5 3 3 .8-2 2 .5 3-3-1.5-3 1.5.5-3-2-2 3-.8z" fill="#bfdbfe" opacity="0.4" />
+            </svg>
+        </div>
+
+        <h1>Confession Sent! ✨</h1>
+        <p class="main-text">Your anonymous confession has been delivered successfully. Your identity is completely
+            protected — no one will ever know it was you.</p>
+
+        <div class="steps-card">
+            <div class="steps-title">What happens now</div>
+            <div class="step-item">
+                <div class="step-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <div class="step-content">
+                    <div class="step-text">Confession Received</div>
+                    <div class="step-subtext">Your message has been safely delivered</div>
+                </div>
+            </div>
+            <div class="step-divider"></div>
+            <div class="step-item">
+                <div class="step-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <div class="step-content">
+                    <div class="step-text">Identity Protected</div>
+                    <div class="step-subtext">No personal data was recorded</div>
+                </div>
+            </div>
+            <div class="step-divider"></div>
+            <div class="step-item">
+                <div class="step-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="step-content">
+                    <div class="step-text">Shared Anonymously</div>
+                    <div class="step-subtext">Your confession might just make someone smile</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <a href="/" class="btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Write Another Confession
+            </a>
+        </div>
+
+        <p class="footer-text">All confessions are anonymous and secure. 🩵</p>
+    </div>
+
+    <script>
+        // Confetti effect
+        function createConfetti() {
+            const shapes = ['●', '■', '▲', '◆'];
+            const colors = ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#818cf8'];
+            const count = 40;
+
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    const el = document.createElement('span');
+                    el.className = 'confetti';
+                    el.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+                    el.style.left = Math.random() * 100 + '%';
+                    el.style.top = (Math.random() * -15) + '%';
+                    el.style.fontSize = (Math.random() * 10 + 6) + 'px';
+                    el.style.color = colors[Math.floor(Math.random() * colors.length)];
+                    el.style.animationDuration = (Math.random() * 2 + 2.5) + 's';
+                    document.body.appendChild(el);
+
+                    setTimeout(() => el.remove(), 4500);
+                }, i * 40);
+            }
+        }
+
+        window.addEventListener('load', () => {
+            setTimeout(createConfetti, 500);
+        });
+    </script>
+</body>
+
+</html>
