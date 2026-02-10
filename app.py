@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, flash, redirect, url_for
+import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
@@ -8,9 +9,7 @@ from datetime import datetime, timedelta
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
 import io
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
-import base64
+import ssl
 
 # Load environment variables
 load_dotenv()
@@ -18,9 +17,11 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-here-change-this')
 
-# Email configuration - SendGrid
-SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
-SENDER_EMAIL = os.getenv('SENDER_EMAIL')  # Your verified sender email in SendGrid
+# Email configuration - Gmail SMTP
+SMTP_SERVER = 'smtp.gmail.com'
+SMTP_PORT = 465  # SSL port (more reliable than 587)
+SENDER_EMAIL = os.getenv('SENDER_EMAIL')  # Your Gmail address
+SENDER_PASSWORD = os.getenv('SENDER_PASSWORD')  # Your Gmail app password
 RECEIVER_EMAIL = os.getenv('RECEIVER_EMAIL')  # Email where you want to receive submissions
 
 # Rate limiting: max 3 confessions per device (tracked by IP)
@@ -185,20 +186,26 @@ def generate_confession_image(confession_text, timestamp):
 
 def send_email(confession_text):
     """
-    Send an email with the confession as both text and image using SendGrid API
+    Send an email with the confession as both text and image using Gmail SMTP
     Returns True if successful, False otherwise
     """
     try:
         # Validate email configuration
-        if not SENDER_EMAIL or not SENDGRID_API_KEY or not RECEIVER_EMAIL:
+        if not SENDER_EMAIL or not SENDER_PASSWORD or not RECEIVER_EMAIL:
             print("Error: Email configuration is missing!")
             print(f"SENDER_EMAIL: {'✓' if SENDER_EMAIL else '✗'}")
-            print(f"SENDGRID_API_KEY: {'✓' if SENDGRID_API_KEY else '✗'}")
+            print(f"SENDER_PASSWORD: {'✓' if SENDER_PASSWORD else '✗'}")
             print(f"RECEIVER_EMAIL: {'✓' if RECEIVER_EMAIL else '✗'}")
             return False
         
         # Get current timestamp
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Create message
+        message = MIMEMultipart()
+        message['From'] = SENDER_EMAIL
+        message['To'] = RECEIVER_EMAIL
+        message['Subject'] = f'New Anonymous Confession - {timestamp}'
         
         # Email body
         body = f"""
@@ -217,44 +224,40 @@ This is an automated message from Anonymous Confessions.
 NOTE: The confession is also attached as an image below for easy viewing.
         """
         
-        # Create SendGrid email message
-        message = Mail(
-            from_email=SENDER_EMAIL,
-            to_emails=RECEIVER_EMAIL,
-            subject=f'New Anonymous Confession - {timestamp}',
-            plain_text_content=body
-        )
+        message.attach(MIMEText(body, 'plain'))
         
         # Generate and attach image
         print("Generating confession image...")
         confession_image = generate_confession_image(confession_text, timestamp)
         
         if confession_image:
-            # Encode image to base64 for SendGrid
-            encoded_image = base64.b64encode(confession_image).decode()
-            
-            # Create attachment
-            attachment = Attachment(
-                FileContent(encoded_image),
-                FileName(f'confession_{timestamp.replace(":", "-").replace(" ", "_")}.png'),
-                FileType('image/png'),
-                Disposition('attachment')
-            )
-            message.attachment = attachment
+            image_part = MIMEImage(confession_image, name=f'confession_{timestamp.replace(":", "-").replace(" ", "_")}.png')
+            image_part.add_header('Content-Disposition', 'attachment', filename=f'confession_{timestamp.replace(":", "-").replace(" ", "_")}.png')
+            message.attach(image_part)
             print("Image attached successfully!")
         else:
             print("Warning: Could not generate image, sending text only.")
         
-        # Send email using SendGrid API
-        sg = SendGridAPIClient(SENDGRID_API_KEY)
-        response = sg.send(message)
+        # Create secure SSL context
+        context = ssl.create_default_context()
+        
+        # Connect to Gmail SMTP server using SSL (port 465)
+        print("Connecting to Gmail SMTP server...")
+        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context, timeout=60) as server:
+            print("Logging in...")
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            
+            print("Sending email...")
+            text = message.as_string()
+            server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, text)
         
         print(f"Email sent successfully to {RECEIVER_EMAIL}")
-        print(f"SendGrid Response Status: {response.status_code}")
         return True
         
     except Exception as e:
         print(f"Error sending email: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return False
 
 
@@ -313,11 +316,11 @@ def success():
 
 if __name__ == '__main__':
     # Check if email configuration is set
-    if not all([SENDER_EMAIL, SENDGRID_API_KEY, RECEIVER_EMAIL]):
+    if not all([SENDER_EMAIL, SENDER_PASSWORD, RECEIVER_EMAIL]):
         print("\n⚠️  WARNING: Email configuration not found!")
-        print("Please set environment variables for SendGrid:")
-        print("  - SENDGRID_API_KEY")
+        print("Please set environment variables for Gmail:")
         print("  - SENDER_EMAIL")
+        print("  - SENDER_PASSWORD (Gmail App Password)")
         print("  - RECEIVER_EMAIL\n")
     
     # Use environment variable for port (required for Render.com)
